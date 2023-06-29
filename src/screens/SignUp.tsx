@@ -12,18 +12,24 @@ import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
 
+type FormDataProps = {
+    name: string;
+    email: string;
+    password: string;
+    password_confirm: string;
+}
 
     const signUpSchema = yup.object({
-        name: yup.string().required('Informe o nome:'),
-        email: yup.string().required('Informe o email:').email('Email inválido'),
-        password: yup.string().required('Informe sua senha:'),
-        password_confirm: yup.string().required('Informe sua senha:')
+        name: yup.string().required('Informe o nome'),
+        email: yup.string().required('Informe o email').email('Email inválido'),
+        password: yup.string().required('Informe sua senha').min(6,'Senha com mínimo de 6 caracteres'),
+        password_confirm: yup.string().required('Confirme sua senha novamente').oneOf([yup.ref('password')], 'As confirmação da senha não confere')
     });
 
 
 export function SignUp(){
 
-    const { control, handleSubmit, formState: { errors } } = useForm({
+    const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>( {
         resolver: yupResolver(signUpSchema)
     });
 
@@ -32,8 +38,8 @@ export function SignUp(){
         navigation.goBack();
     }
 
-    function handleSignUp(){
-        //console.log({ name, email, password, password_confirm});
+    function handleSignUp({ name, email, password, password_confirm}: FormDataProps){
+        console.log({ name, email, password, password_confirm});
     }
 
 
@@ -97,6 +103,7 @@ export function SignUp(){
                                 secureTextEntry
                                 onChangeText={onChange}
                                 value= {value}
+                                errorMessage= {errors.password?.message}
                             />
                         )}
                     />
@@ -112,6 +119,7 @@ export function SignUp(){
                                 value= {value}
                                 onSubmitEditing={handleSubmit(handleSignUp)}
                                 returnKeyType='send'
+                                errorMessage= {errors.password_confirm?.message}
                             />
                         )}
                     />
@@ -126,7 +134,7 @@ export function SignUp(){
                     <Button
                         title='Voltar para login'
                         variant={'outline'}
-                        mt={24}
+                        mt={12}
                         onPress={handleGoBack}
                     />
 
